@@ -1,3 +1,6 @@
 fastapi>=0.68.0,<0.69.0
 uvicorn>=0.15.0,<0.16.0
-pydantic>=1.8.0,<2.0.0 
+pydantic>=1.8.0,<2.0.0
+streamlit>=1.32.0
+requests>=2.31.0
+plotly>=5.19.0 
