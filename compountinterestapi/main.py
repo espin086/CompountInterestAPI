@@ -9,14 +9,14 @@ app = FastAPI(
     version="0.0.1"
 )
 
-class InvestmentInput(BaseModel):
+class Input(BaseModel):
     """Purpose of this class is to define the input for the compound interest calculator"""
     initial_amount: float = Field(..., gt=0, description="Initial investment amount")
     monthly_contribution: float = Field(..., ge=0, description="Monthly contribution amount")
     annual_interest_rate: float = Field(..., gt=0, le=100, description="Annual interest rate (percentage)")
     time_horizon_years: int = Field(..., gt=0, le=50, description="Investment time horizon in years")
 
-class YearlyGrowth(BaseModel):
+class Output(BaseModel):
     """Purpose of this class is to define the output for the compound interest calculator"""
     year: int
     starting_balance: float
@@ -24,8 +24,8 @@ class YearlyGrowth(BaseModel):
     interest_earned: float
     ending_balance: float
 
-@app.post("/calculate", response_model=List[YearlyGrowth])
-async def calculate_compound_interest(investment: InvestmentInput):
+@app.post("/calculate", response_model=List[Output])
+async def calculate_compound_interest(investment: Input):
     """
     Calculate compound interest with monthly contributions
     
@@ -48,7 +48,7 @@ async def calculate_compound_interest(investment: InvestmentInput):
         current_balance = ending_balance
 
         yearly_results.append(
-            YearlyGrowth(
+            Output(
                 year=year,
                 starting_balance=round(starting_balance, 2),
                 contributions=round(contributions, 2),
