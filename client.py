@@ -1,7 +1,7 @@
 import requests
 
 # API URL
-API_URL = "http://127.0.0.1:8000/calculate"
+API_URL = "https://compound-interest-api-716322454394.us-central1.run.app/calculate"
 
 # Sample investment input
 data = {

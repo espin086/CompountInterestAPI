@@ -37,7 +37,7 @@ RUN poetry install --no-root --no-dev
 COPY ./compountinterestapi /app/compountinterestapi
 
 # Expose port 8000
-EXPOSE 8000
+EXPOSE 8080
 
 # Command to run the application using Poetry
-CMD ["poetry", "run", "uvicorn", "compountinterestapi.main:app", "--host", "0.0.0.0", "--port", "8000"] 
+CMD ["poetry", "run", "uvicorn", "compountinterestapi.main:app", "--host", "0.0.0.0", "--port", "8080"] 

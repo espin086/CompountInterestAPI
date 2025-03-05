@@ -78,6 +78,70 @@ kubectl get pods -l app=compound-interest-api
 kubectl get endpoints compound-interest-api-service
 ```
 
+#### Option C: Deploy to Google Cloud Run
+
+##### Method 1: Deploy with Terraform
+
+##### Method 2: Deploy with Google Cloud CLI
+
+1. Install Google Cloud SDK: Ensure that the Google Cloud SDK is installed.
+
+2. Authenticate and Set Project:
+```bash
+gcloud auth login
+gcloud config set project YOUR_PROJECT_ID
+```
+
+3. Enable Required Services:
+```bash
+gcloud services enable run.googleapis.com artifactregistry.googleapis.com
+```
+
+4. Create a Service Account:
+Create a service account `terraform-service-account@{YOUR_PROJECT_ID}.iam.gserviceaccount.com` and grant the following roles to it. Then, download the JSON key and rename it as `terraform-key.json`.
+  - Artifact Registry Administrator
+  - Cloud Run Admin
+  - Service Account User
+
+5. Authenticate with Google Cloud:
+```bash
+gcloud auth activate-service-account terraform-service-account@{YOUR_PROJECT_ID}.iam.gserviceaccount.com --key-file="terraform-key.json"
+gcloud config set project YOUR_PROJECT_ID
+gcloud auth configure-docker us-central1-docker.pkg.dev
+```
+
+4. Create Google Artifact Registry Repository:
+```bash
+gcloud artifacts repositories create YOUR_REPO_NAME `
+  --repository-format=docker `
+  --location=YOUR_REGION `
+  --description="Docker container registry repository"
+```
+
+5. Build and Push Docker Image:
+``` bash
+docker build -t compound-interest-api .
+docker tag compound-interest-api "us-central1-docker.pkg.dev/YOUR_PROJECT_ID/YOUR_REPO_NAME/app:v1"
+docker push "us-central1-docker.pkg.dev/YOUR_PROJECT_ID/YOUR_REPO_NAME/app:v1"
+```
+
+6. Deploy to Google Cloud Run:
+``` bash
+gcloud run deploy compound-interest-api `
+  --image="us-central1-docker.pkg.dev/YOUR_PROJECT_ID/YOUR_REPO_NAME/app:v1" `
+  --platform=managed `
+  --region=YOUR_REGION `
+  --allow-unauthenticated `
+  --service-account=YOUR_SERVICE_ACCOUNT
+
+gcloud run services add-iam-policy-binding compound-interest-api `
+  --member="allUsers" `
+  --role="roles/run.invoker" `
+  --region=YOUR_REGION
+```
+
+It will return the `Service URL`. Use that to get the response from the API.
+
 ### 🔹 4. Test the API
 
 Using cURL:
