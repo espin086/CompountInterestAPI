@@ -13,6 +13,8 @@ Ensure you have the following installed:
 - Git
 - Minikube (for local Kubernetes deployment)
 - kubectl (Kubernetes command-line tool)
+- Terraform
+- Google Cloud CLI
 
 ### 🔹 2. Clone the Repository
 
