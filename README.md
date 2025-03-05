@@ -23,7 +23,7 @@ cd compound-interest-api
 
 ### 🔹 3. Deployment Options
 
-You can run this API either using Docker directly or deploy it to Kubernetes using Minikube.
+You can run this API either using Docker directly, deploy it to Kubernetes using Minikube, or deploy it on Google Cloud using Terraform or Google Cloud CLI.
 
 #### Option A: Run with Docker
 
@@ -81,6 +81,40 @@ kubectl get endpoints compound-interest-api-service
 #### Option C: Deploy to Google Cloud Run
 
 ##### Method 1: Deploy with Terraform
+1. Install Google Cloud SDK: Ensure that the Google Cloud SDK is installed.
+
+2. Authenticate and Set Project:
+```bash
+gcloud auth login
+gcloud config set project YOUR_PROJECT_ID
+```
+
+3. Enable Required Services:
+```bash
+gcloud services enable run.googleapis.com artifactregistry.googleapis.com
+```
+
+4. Create a Service Account:
+Create a service account `compoundinterestapi-service-account@YOUR_PROJECT_ID.iam.gserviceaccount.com` and grant the following roles to it. Then, download the JSON key and rename it as `compoundinterestapi-key.json`.
+  - Artifact Registry Administrator
+  - Cloud Run Admin
+  - Service Account User
+
+5. Authenticate with Google Cloud:
+```bash
+gcloud auth activate-service-account compoundinterestapi-service-account@YOUR_PROJECT_ID.iam.gserviceaccount.com --key-file="compoundinterestapi-key.json"
+gcloud auth configure-docker us-central1-docker.pkg.dev
+```
+
+6. Initialize Terraform:
+```bash
+terraform init
+```
+
+6. Apply Terraform configuration to deploy:
+```bash
+terraform apply -var="project_id=YOUR_PROJECT_ID" -auto-approve  
+```
 
 ##### Method 2: Deploy with Google Cloud CLI
 
@@ -98,46 +132,45 @@ gcloud services enable run.googleapis.com artifactregistry.googleapis.com
 ```
 
 4. Create a Service Account:
-Create a service account `terraform-service-account@{YOUR_PROJECT_ID}.iam.gserviceaccount.com` and grant the following roles to it. Then, download the JSON key and rename it as `terraform-key.json`.
+Create a service account `compoundinterestapi-service-account@YOUR_PROJECT_ID.iam.gserviceaccount.com` and grant the following roles to it. Then, download the JSON key and rename it as `compoundinterestapi-key.json`.
   - Artifact Registry Administrator
   - Cloud Run Admin
   - Service Account User
 
 5. Authenticate with Google Cloud:
 ```bash
-gcloud auth activate-service-account terraform-service-account@{YOUR_PROJECT_ID}.iam.gserviceaccount.com --key-file="terraform-key.json"
-gcloud config set project YOUR_PROJECT_ID
+gcloud auth activate-service-account compoundinterestapi-service-account@YOUR_PROJECT_ID.iam.gserviceaccount.com --key-file="compoundinterestapi-key.json"
 gcloud auth configure-docker us-central1-docker.pkg.dev
 ```
 
 4. Create Google Artifact Registry Repository:
 ```bash
-gcloud artifacts repositories create YOUR_REPO_NAME `
+gcloud artifacts repositories create compount-interest-api `
   --repository-format=docker `
-  --location=YOUR_REGION `
+  --location=us-central1 `
   --description="Docker container registry repository"
 ```
 
 5. Build and Push Docker Image:
 ``` bash
 docker build -t compound-interest-api .
-docker tag compound-interest-api "us-central1-docker.pkg.dev/YOUR_PROJECT_ID/YOUR_REPO_NAME/app:v1"
-docker push "us-central1-docker.pkg.dev/YOUR_PROJECT_ID/YOUR_REPO_NAME/app:v1"
+docker tag compound-interest-api "us-central1-docker.pkg.dev/YOUR_PROJECT_ID/compount-interest-api/app:v1"
+docker push "us-central1-docker.pkg.dev/YOUR_PROJECT_ID/compount-interest-api/app:v1"
 ```
 
 6. Deploy to Google Cloud Run:
 ``` bash
 gcloud run deploy compound-interest-api `
-  --image="us-central1-docker.pkg.dev/YOUR_PROJECT_ID/YOUR_REPO_NAME/app:v1" `
+  --image="us-central1-docker.pkg.dev/YOUR_PROJECT_ID/compount-interest-api/app:v1" `
   --platform=managed `
-  --region=YOUR_REGION `
+  --region=us-central1 `
   --allow-unauthenticated `
-  --service-account=YOUR_SERVICE_ACCOUNT
+  --service-account=compoundinterestapi-service-account@YOUR_PROJECT_ID.iam.gserviceaccount.com 
 
 gcloud run services add-iam-policy-binding compound-interest-api `
   --member="allUsers" `
   --role="roles/run.invoker" `
-  --region=YOUR_REGION
+  --region=us-central1
 ```
 
 It will return the `Service URL`. Use that to get the response from the API.
@@ -220,4 +253,18 @@ For Docker deployment:
 ```bash
 # Stop the container
 docker stop $(docker ps -q --filter ancestor=compound-interest-api)
+```
+
+For Google Cloud Run deployment:
+```bash
+# Delete the Cloud Run service
+gcloud run services delete compound-interest-api --region=us-central1 --quiet
+
+# Delete the Artifact Registry repository
+gcloud artifacts repositories delete compount-interest-api --location=us-central1 --quiet
+```
+
+For Terraform deployment:
+```bash
+terraform destroy -var="project_id=YOUR_PROJECT_ID" -auto-approve
 ```
