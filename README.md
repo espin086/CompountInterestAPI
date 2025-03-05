@@ -209,6 +209,16 @@ curl -X POST "http://127.0.0.1/calculate" \
            "annual_interest_rate": 7,
            "time_horizon_years": 10
          }'
+
+# For Google Cloud Run
+curl -X POST "https://compound-interest-api-716322454394.us-central1.run.app/calculate" \
+     -H "Content-Type: application/json" \
+     -d '{
+           "initial_amount": 10000,
+           "monthly_contribution": 500,
+           "annual_interest_rate": 7,
+           "time_horizon_years": 10
+         }'
 ```
 
 Using Python:
@@ -222,6 +232,8 @@ API_URL = "http://127.0.0.1:8000/calculate"
 # API_URL = "http://127.0.0.1:8080/calculate"
 # Kubernetes with minikube tunnel
 # API_URL = "http://127.0.0.1/calculate"
+# Cloud Run
+# API_URL = "https://compound-interest-api-716322454394.us-central1.run.app/calculate"
 
 # Sample investment input
 data = {
